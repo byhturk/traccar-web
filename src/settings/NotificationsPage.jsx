@@ -13,10 +13,14 @@ import CollectionActions from './components/CollectionActions';
 import TableShimmer from '../common/components/TableShimmer';
 import SearchHeader, { filterByKeyword } from './components/SearchHeader';
 import useSettingsStyles from './common/useSettingsStyles';
+import { useAdministrator } from '../common/util/permissions';
+
 
 const NotificationsPage = () => {
   const classes = useSettingsStyles();
   const t = useTranslation();
+  const admin = useAdministrator();
+
 
   const [timestamp, setTimestamp] = useState(Date.now());
   const [items, setItems] = useState([]);
@@ -54,9 +58,13 @@ const NotificationsPage = () => {
       <Table className={classes.table}>
         <TableHead>
           <TableRow>
+          {admin && 
             <TableCell>{t('sharedDescription')}</TableCell>
+          }
             <TableCell>{t('notificationType')}</TableCell>
+            {admin && 
             <TableCell>{t('notificationAlways')}</TableCell>
+          }
             <TableCell>{t('sharedAlarms')}</TableCell>
             <TableCell>{t('notificationNotificators')}</TableCell>
             <TableCell className={classes.columnAction} />
@@ -65,9 +73,14 @@ const NotificationsPage = () => {
         <TableBody>
           {!loading ? items.filter(filterByKeyword(searchKeyword)).map((item) => (
             <TableRow key={item.id}>
+            {admin && 
               <TableCell>{item.description}</TableCell>
+            }
               <TableCell>{t(prefixString('event', item.type))}</TableCell>
+           
+              {admin && 
               <TableCell>{formatBoolean(item.always, t)}</TableCell>
+            }
               <TableCell>{formatList('alarm', item.attributes.alarms)}</TableCell>
               <TableCell>{formatList('notificator', item.notificators)}</TableCell>
               <TableCell className={classes.columnAction} padding="none">

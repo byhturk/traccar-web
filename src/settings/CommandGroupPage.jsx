@@ -22,6 +22,8 @@ import PageLayout from '../common/components/PageLayout';
 import SettingsMenu from './components/SettingsMenu';
 import { useCatch } from '../reactHelper';
 import useSettingsStyles from './common/useSettingsStyles';
+import { useAdministrator } from '../common/util/permissions';
+
 
 const CommandDevicePage = () => {
   const navigate = useNavigate();
@@ -29,6 +31,8 @@ const CommandDevicePage = () => {
   const t = useTranslation();
 
   const { id } = useParams();
+  const admin = useAdministrator();
+
 
   const textEnabled = useSelector((state) => state.session.server.textEnabled);
 
@@ -70,7 +74,7 @@ const CommandDevicePage = () => {
               onChange={(e) => setItem({ ...item, attributes: { ...item.attributes, data: e.target.value } })}
               label={t('commandData')}
             />
-            {textEnabled && (
+            {textEnabled && admin && (
               <FormControlLabel
                 control={<Checkbox checked={item.textChannel} onChange={(event) => setItem({ ...item, textChannel: event.target.checked })} />}
                 label={t('commandSendSms')}

@@ -9,10 +9,14 @@ import EditAttributesAccordion from './components/EditAttributesAccordion';
 import { useTranslation } from '../common/components/LocalizationProvider';
 import SettingsMenu from './components/SettingsMenu';
 import useSettingsStyles from './common/useSettingsStyles';
+import { useAdministrator } from '../common/util/permissions';
+
 
 const DriverPage = () => {
   const classes = useSettingsStyles();
   const t = useTranslation();
+  const admin = useAdministrator();
+
 
   const [item, setItem] = useState();
 

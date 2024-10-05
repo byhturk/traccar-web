@@ -18,6 +18,9 @@ import {
   IconButton,
   OutlinedInput,
 } from '@mui/material';
+import VisibilityIcon from '@mui/icons-material/Visibility';// İmport satırını ekledim
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';// İmport 
+import makeStyles from '@mui/styles/makeStyles';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import CachedIcon from '@mui/icons-material/Cached';
@@ -37,6 +40,16 @@ import { useCatch } from '../reactHelper';
 import useMapStyles from '../map/core/useMapStyles';
 import { map } from '../map/core/MapView';
 import useSettingsStyles from './common/useSettingsStyles';
+
+const useStyles = makeStyles((theme) => ({
+  details: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing(2),
+    paddingBottom: theme.spacing(3),
+  },
+}));
+
 
 const UserPage = () => {
   const classes = useSettingsStyles();
@@ -78,6 +91,12 @@ const UserPage = () => {
       setDeleteFailed(true);
     }
   });
+  
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleTogglePassword = () => {
+    setShowPassword(!showPassword);
+  };
 
   const handleGenerateTotp = useCatch(async () => {
     const response = await fetch('/api/users/totp', { method: 'POST' });
@@ -135,6 +154,8 @@ const UserPage = () => {
                 value={item.name || ''}
                 onChange={(e) => setItem({ ...item, name: e.target.value })}
                 label={t('sharedName')}
+                disabled={fixedEmail}
+
               />
               <TextField
                 value={item.email || ''}
@@ -144,9 +165,18 @@ const UserPage = () => {
               />
               {!openIdForced && (
                 <TextField
-                  type="password"
-                  onChange={(e) => setItem({ ...item, password: e.target.value })}
+                type={showPassword ? 'text' : 'password'}
+                onChange={(e) => setItem({ ...item, password: e.target.value })}
                   label={t('userPassword')}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton onClick={handleTogglePassword} edge="end">
+                          {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
                 />
               )}
               {totpEnable && (
@@ -182,12 +212,14 @@ const UserPage = () => {
                 value={item.phone || ''}
                 onChange={(e) => setItem({ ...item, phone: e.target.value })}
                 label={t('sharedPhone')}
+                disabled={fixedEmail}
+
               />
               <FormControl>
                 <InputLabel>{t('mapDefault')}</InputLabel>
                 <Select
                   label={t('mapDefault')}
-                  value={item.map || 'locationIqStreets'}
+                  value={item.map || 'custom'}
                   onChange={(e) => setItem({ ...item, map: e.target.value })}
                 >
                   {mapStyles.filter((style) => style.available).map((style) => (
@@ -268,6 +300,7 @@ const UserPage = () => {
                 value={item.poiLayer || ''}
                 onChange={(e) => setItem({ ...item, poiLayer: e.target.value })}
                 label={t('mapPoiLayer')}
+                disabled={fixedEmail}
               />
             </AccordionDetails>
           </Accordion>
@@ -313,6 +346,8 @@ const UserPage = () => {
               </Button>
             </AccordionDetails>
           </Accordion>
+          {admin && (
+
           <Accordion>
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
               <Typography variant="subtitle1">
@@ -384,6 +419,8 @@ const UserPage = () => {
               </FormGroup>
             </AccordionDetails>
           </Accordion>
+          )}
+          {admin && 
           <EditAttributesAccordion
             attribute={attribute}
             attributes={item.attributes}
@@ -391,6 +428,8 @@ const UserPage = () => {
             definitions={{ ...commonUserAttributes, ...userAttributes }}
             focusAttribute={attribute}
           />
+        }
+
           {registrationEnabled && item.id === currentUser.id && !manager && (
             <Accordion>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>

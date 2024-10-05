@@ -119,7 +119,7 @@ const SettingsMenu = () => {
                 selected={location.pathname.startsWith('/settings/maintenance')}
               />
             )}
-            {!features.disableSavedCommands && (
+            {!features.disableComputedAttributes && (
               <MenuItem
                 title={t('sharedSavedCommands')}
                 link="/settings/commands"

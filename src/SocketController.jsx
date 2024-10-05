@@ -59,7 +59,7 @@ const SocketController = () => {
         } catch (error) {
           // ignore errors
         }
-        setTimeout(() => connectSocket(), 60000);
+        setTimeout(() => connectSocket(), 5000);
       }
     };
 

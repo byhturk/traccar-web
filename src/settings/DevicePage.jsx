@@ -11,7 +11,7 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { DropzoneArea } from 'react-mui-dropzone';
 import EditItemView from './components/EditItemView';
-import EditAttributesAccordion from './components/EditAttributesAccordion';
+import EditAttributesAccordion from './components/EditAttributesAccordionUser';
 import SelectField from '../common/components/SelectField';
 import deviceCategories from '../common/util/deviceCategories';
 import { useTranslation } from '../common/components/LocalizationProvider';
@@ -22,6 +22,7 @@ import useCommonDeviceAttributes from '../common/attributes/useCommonDeviceAttri
 import { useCatch } from '../reactHelper';
 import useQuery from '../common/util/useQuery';
 import useSettingsStyles from './common/useSettingsStyles';
+import EditAttributesAccordionUser from './components/EditAttributesAccordionUser';
 
 const DevicePage = () => {
   const classes = useSettingsStyles();
@@ -75,7 +76,9 @@ const DevicePage = () => {
                 value={item.name || ''}
                 onChange={(event) => setItem({ ...item, name: event.target.value })}
                 label={t('sharedName')}
+                disabled={!admin}
               />
+              {admin && 
               <TextField
                 value={item.uniqueId || ''}
                 onChange={(event) => setItem({ ...item, uniqueId: event.target.value })}
@@ -83,6 +86,7 @@ const DevicePage = () => {
                 helperText={t('deviceIdentifierHelp')}
                 disabled={Boolean(uniqueId)}
               />
+              }
             </AccordionDetails>
           </Accordion>
           <Accordion>
@@ -92,22 +96,28 @@ const DevicePage = () => {
               </Typography>
             </AccordionSummary>
             <AccordionDetails className={classes.details}>
-              <SelectField
-                value={item.groupId}
-                onChange={(event) => setItem({ ...item, groupId: Number(event.target.value) })}
-                endpoint="/api/groups"
-                label={t('groupParent')}
-              />
+              {admin && 
+                <SelectField
+                  value={item.groupId}
+                  onChange={(event) => setItem({ ...item, groupId: Number(event.target.value) })}
+                  endpoint="/api/groups"
+                  label={t('groupParent')}
+                />
+              }
+              {admin && 
               <TextField
                 value={item.phone || ''}
                 onChange={(event) => setItem({ ...item, phone: event.target.value })}
                 label={t('sharedPhone')}
               />
+              }
+              {admin && 
               <TextField
                 value={item.model || ''}
                 onChange={(event) => setItem({ ...item, model: event.target.value })}
                 label={t('deviceModel')}
               />
+              }
               <TextField
                 value={item.contact || ''}
                 onChange={(event) => setItem({ ...item, contact: event.target.value })}
@@ -122,12 +132,14 @@ const DevicePage = () => {
                 }))}
                 label={t('deviceCategory')}
               />
+              {admin && 
               <SelectField
                 value={item.calendarId}
                 onChange={(event) => setItem({ ...item, calendarId: Number(event.target.value) })}
                 endpoint="/api/calendars"
                 label={t('sharedCalendar')}
               />
+              }
               <TextField
                 label={t('userExpirationTime')}
                 type="date"
@@ -146,7 +158,7 @@ const DevicePage = () => {
               />
             </AccordionDetails>
           </Accordion>
-          {item.id && (
+          {item.id && admin && (
             <Accordion>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <Typography variant="subtitle1">
@@ -165,8 +177,8 @@ const DevicePage = () => {
               </AccordionDetails>
             </Accordion>
           )}
-          <EditAttributesAccordion
-            attributes={item.attributes}
+          <EditAttributesAccordionUser
+            attributes={admin ? item.attributes : Object.fromEntries(Object.entries(item.attributes).filter(([key]) => key === "speedLimit"))}
             setAttributes={(attributes) => setItem({ ...item, attributes })}
             definitions={{ ...commonDeviceAttributes, ...deviceAttributes }}
           />

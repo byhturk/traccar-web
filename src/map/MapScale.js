@@ -9,7 +9,7 @@ const MapScale = () => {
   const control = useMemo(() => new maplibregl.ScaleControl(), []);
 
   useEffect(() => {
-    map.addControl(control, 'bottom-left');
+    map.addControl(control, 'bottom-right');
     return () => map.removeControl(control);
   }, [control]);
 

@@ -10,11 +10,11 @@ import { useTranslation } from '../common/components/LocalizationProvider';
 import PageLayout from '../common/components/PageLayout';
 import SettingsMenu from './components/SettingsMenu';
 import CollectionFab from './components/CollectionFab';
-import CollectionActions from './components/CollectionActions';
+import CollectionActionsGroup from './components/CollectionActionsGroup';
 import TableShimmer from '../common/components/TableShimmer';
 import SearchHeader, { filterByKeyword } from './components/SearchHeader';
 import { formatTime } from '../common/util/formatter';
-import { useDeviceReadonly, useManager } from '../common/util/permissions';
+import { useAdministrator, useDeviceReadonly, useManager } from '../common/util/permissions';
 import useSettingsStyles from './common/useSettingsStyles';
 import DeviceUsersValue from './components/DeviceUsersValue';
 
@@ -26,6 +26,8 @@ const DevicesPage = () => {
   const groups = useSelector((state) => state.groups.items);
 
   const manager = useManager();
+  const admin = useAdministrator();
+
   const deviceReadonly = useDeviceReadonly();
 
   const [timestamp, setTimestamp] = useState(Date.now());
@@ -67,11 +69,26 @@ const DevicesPage = () => {
         <TableHead>
           <TableRow>
             <TableCell>{t('sharedName')}</TableCell>
+            {admin && (
+
             <TableCell>{t('deviceIdentifier')}</TableCell>
+            )}
+            {admin && (
+
             <TableCell>{t('groupParent')}</TableCell>
+            )}
+            {admin && (
+
             <TableCell>{t('sharedPhone')}</TableCell>
+            )}
+            {admin && (
+
             <TableCell>{t('deviceModel')}</TableCell>
+            )}
+            {admin && (
+
             <TableCell>{t('deviceContact')}</TableCell>
+            )}
             <TableCell>{t('userExpirationTime')}</TableCell>
             {manager && <TableCell>{t('settingsUsers')}</TableCell>}
             <TableCell className={classes.columnAction} />
@@ -81,15 +98,35 @@ const DevicesPage = () => {
           {!loading ? items.filter(filterByKeyword(searchKeyword)).map((item) => (
             <TableRow key={item.id}>
               <TableCell>{item.name}</TableCell>
+              {admin && (
+
               <TableCell>{item.uniqueId}</TableCell>
+              )}
+
+              {admin && (
+
               <TableCell>{item.groupId ? groups[item.groupId]?.name : null}</TableCell>
+              )}
+
+              {admin && (
+
               <TableCell>{item.phone}</TableCell>
+              )}
+
+              {admin && (
+
               <TableCell>{item.model}</TableCell>
+              )}
+
+              {admin && (
+
               <TableCell>{item.contact}</TableCell>
+              )}
+
               <TableCell>{formatTime(item.expirationTime, 'date')}</TableCell>
               {manager && <TableCell><DeviceUsersValue deviceId={item.id} /></TableCell>}
               <TableCell className={classes.columnAction} padding="none">
-                <CollectionActions
+                <CollectionActionsGroup
                   itemId={item.id}
                   editPath="/settings/device"
                   endpoint="devices"
@@ -123,7 +160,12 @@ const DevicesPage = () => {
           </TableRow>
         </TableFooter>
       </Table>
+      {admin && (
+
       <CollectionFab editPath="/settings/device" />
+      )}
+
+
     </PageLayout>
   );
 };

@@ -38,6 +38,25 @@ const LinkField = ({
       }
     }
   }, [active]);
+    // Verileri bileşen yüklendiğinde al takiponversion
+    const fetchData = async () => {
+      setActive(true);
+      const allResponse = await fetch(endpointAll);
+      const linkedResponse = await fetch(endpointLinked);
+      if (allResponse.ok && linkedResponse.ok) {
+        const allData = await allResponse.json();
+        const linkedData = await linkedResponse.json();
+        setItems(allData);
+        setLinked(linkedData);
+      } else {
+        console.error('Error fetching data');
+      }
+    };
+  
+    // Bileşen yüklendiğinde verileri al takiponversion
+    React.useEffect(() => {
+      fetchData();
+    }, [endpointAll, endpointLinked]);
 
   const createBody = (linkId) => {
     const body = {};

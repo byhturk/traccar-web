@@ -10,16 +10,18 @@ import { useTranslation } from '../common/components/LocalizationProvider';
 import PageLayout from '../common/components/PageLayout';
 import SettingsMenu from './components/SettingsMenu';
 import CollectionFab from './components/CollectionFab';
-import CollectionActions from './components/CollectionActions';
+import CollectionActionsGroup from './components/CollectionActionsGroup';
 import TableShimmer from '../common/components/TableShimmer';
 import SearchHeader, { filterByKeyword } from './components/SearchHeader';
-import { useRestriction } from '../common/util/permissions';
+import { useAdministrator,useRestriction } from '../common/util/permissions';
 import useSettingsStyles from './common/useSettingsStyles';
 
 const GroupsPage = () => {
   const classes = useSettingsStyles();
   const navigate = useNavigate();
   const t = useTranslation();
+  const admin = useAdministrator();
+
 
   const limitCommands = useRestriction('limitCommands');
 
@@ -71,7 +73,7 @@ const GroupsPage = () => {
             <TableRow key={item.id}>
               <TableCell>{item.name}</TableCell>
               <TableCell className={classes.columnAction} padding="none">
-                <CollectionActions
+                <CollectionActionsGroup
                   itemId={item.id}
                   editPath="/settings/group"
                   endpoint="groups"
@@ -83,7 +85,10 @@ const GroupsPage = () => {
           )) : (<TableShimmer columns={2} endAction />)}
         </TableBody>
       </Table>
-      <CollectionFab editPath="/settings/group" />
+      {admin &&
+        <CollectionFab editPath="/settings/group" />
+      }
+
     </PageLayout>
   );
 };

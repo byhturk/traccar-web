@@ -4,6 +4,7 @@ import {
 } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import MainPage from './main/MainPage';
+import Dashboard from './main/Dashboard';
 import CombinedReportPage from './reports/CombinedReportPage';
 import RouteReportPage from './reports/RouteReportPage';
 import ServerPage from './settings/ServerPage';
@@ -32,6 +33,7 @@ import MaintenancesPage from './settings/MaintenancesPage';
 import MaintenancePage from './settings/MaintenancePage';
 import CommandsPage from './settings/CommandsPage';
 import CommandPage from './settings/CommandPage';
+import SupportPage from './settings/SupportPage';
 import StatisticsPage from './reports/StatisticsPage';
 import LoginPage from './login/LoginPage';
 import RegisterPage from './login/RegisterPage';
@@ -111,6 +113,8 @@ const Navigation = () => {
         <Route path="replay" element={<ReplayPage />} />
         <Route path="geofences" element={<GeofencesPage />} />
         <Route path="emulator" element={<EmulatorPage />} />
+        <Route path="dashboard" element={<Dashboard />} />
+
 
         <Route path="settings">
           <Route path="accumulators/:deviceId" element={<AccumulatorsPage />} />
@@ -152,6 +156,8 @@ const Navigation = () => {
           <Route path="user/:id/connections" element={<UserConnectionsPage />} />
           <Route path="user/:id" element={<UserPage />} />
           <Route path="user" element={<UserPage />} />
+          <Route path="supportpage" element={<SupportPage />} />
+
         </Route>
 
         <Route path="reports">

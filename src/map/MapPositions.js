@@ -25,6 +25,8 @@ const MapPositions = ({ positions, onClick, showStatus, selectedPosition, titleF
 
   const createFeature = (devices, position, selectedPositionId) => {
     const device = devices[position.deviceId];
+    {/*category tanımı yaptık locked ekledikten sonra */}
+    const category = position && position.attributes && position.attributes.blocked ? 'locked' : device.category ;
     let showDirection;
     switch (directionType) {
       case 'none':
@@ -42,8 +44,8 @@ const MapPositions = ({ positions, onClick, showStatus, selectedPosition, titleF
       deviceId: position.deviceId,
       name: device.name,
       fixTime: formatTime(position.fixTime, 'seconds'),
-      category: mapIconKey(device.category),
-      color: showStatus ? position.attributes.color || getStatusColor(device.status) : 'neutral',
+      category: mapIconKey(category),
+      color: showStatus ? position.attributes.color || position.attributes.blocked ? 'error' : getStatusColor(device.status) : 'neutral' ,
       rotation: position.course,
       direction: showDirection,
     };

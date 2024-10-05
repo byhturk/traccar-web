@@ -13,6 +13,7 @@ import BarChartIcon from '@mui/icons-material/BarChart';
 import RouteIcon from '@mui/icons-material/Route';
 import EventRepeatIcon from '@mui/icons-material/EventRepeat';
 import NotesIcon from '@mui/icons-material/Notes';
+import HomeIcon from '@mui/icons-material/Home';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from '../../common/components/LocalizationProvider';
 import { useAdministrator, useRestriction } from '../../common/util/permissions';
@@ -37,17 +38,25 @@ const ReportsMenu = () => {
     <>
       <List>
         <MenuItem
+          title={t('dashboardTitle')}
+          link="/dashboard"
+          icon={<HomeIcon />}
+          selected={location.pathname === '/dashboard'}
+        />
+        <MenuItem
           title={t('reportCombined')}
           link="/reports/combined"
           icon={<StarIcon />}
           selected={location.pathname === '/reports/combined'}
         />
-        <MenuItem
-          title={t('reportRoute')}
-          link="/reports/route"
-          icon={<TimelineIcon />}
-          selected={location.pathname === '/reports/route'}
-        />
+        {admin && (
+          <MenuItem
+            title={t('reportRoute')}
+            link="/reports/route"
+            icon={<TimelineIcon />}
+            selected={location.pathname === '/reports/route'}
+          />
+        )}
         <MenuItem
           title={t('reportEvents')}
           link="/reports/event"
@@ -57,7 +66,7 @@ const ReportsMenu = () => {
         <MenuItem
           title={t('reportTrips')}
           link="/reports/trip"
-          icon={<PlayCircleFilledIcon />}
+          icon={<RouteIcon />}
           selected={location.pathname === '/reports/trip'}
         />
         <MenuItem
@@ -81,17 +90,19 @@ const ReportsMenu = () => {
         <MenuItem
           title={t('reportReplay')}
           link="/replay"
-          icon={<RouteIcon />}
+          icon={<PlayCircleFilledIcon />}
         />
       </List>
       <Divider />
       <List>
-        <MenuItem
-          title={t('sharedLogs')}
-          link="/reports/logs"
-          icon={<NotesIcon />}
-          selected={location.pathname === '/reports/logs'}
-        />
+        {admin && (
+          <MenuItem
+            title={t('sharedLogs')}
+            link="/reports/logs"
+            icon={<NotesIcon />}
+            selected={location.pathname === '/reports/logs'}
+          />
+        )}
         {!readonly && (
           <MenuItem
             title={t('reportScheduled')}

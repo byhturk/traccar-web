@@ -5,8 +5,12 @@ import { useNavigate } from 'react-router-dom';
 import {
   Accordion, AccordionSummary, AccordionDetails, Typography, Container, FormControl, InputLabel, Select, MenuItem, Checkbox, FormControlLabel, FormGroup, InputAdornment, IconButton, OutlinedInput, Autocomplete, TextField, createFilterOptions, Button,
 } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CachedIcon from '@mui/icons-material/Cached';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { useTranslation, useTranslationKeys } from '../common/components/LocalizationProvider';
 import PageLayout from '../common/components/PageLayout';
@@ -20,6 +24,23 @@ import { useCatch } from '../reactHelper';
 import { sessionActions } from '../store';
 import { useAdministrator, useRestriction } from '../common/util/permissions';
 import useSettingsStyles from './common/useSettingsStyles';
+import alert from '../../src/resources/alert.mp3';
+import alert2 from '../../src/resources/alert2.mp3';
+import alert3 from '../../src/resources/alert3.mp3';
+import alert4 from '../../src/resources/alert4.mp3';
+import alert5 from '../../src/resources/alert5.mp3';
+import alert6 from '../../src/resources/alert6.mp3';
+import sound from '../../src/resources/sound.mp3';
+import sound2 from '../../src/resources/sound2.mp3';
+import sound3 from '../../src/resources/sound3.mp3';
+import sound4 from '../../src/resources/sound4.mp3';
+import sound5 from '../../src/resources/sound5.mp3';
+import sound6 from '../../src/resources/sound6.mp3';
+
+
+
+const isAppleDevice = /Mac|iPhone|iPod|iPad/.test(navigator.platform);
+
 
 const deviceFields = [
   { id: 'name', name: 'sharedName' },
@@ -28,6 +49,53 @@ const deviceFields = [
   { id: 'model', name: 'deviceModel' },
   { id: 'contact', name: 'deviceContact' },
 ];
+
+//takipon
+const soundFiles = [
+  { id: 'sound', name: 'Sound', file: sound },
+  { id: 'sound2', name: 'Sound 2', file: sound2 },
+  { id: 'sound3', name: 'Sound 3', file: sound3 },
+  { id: 'sound4', name: 'Sound 4', file: sound4 },
+  { id: 'sound5', name: 'Sound 5', file: sound5 },
+  { id: 'sound6', name: 'Sound 6', file: sound6 },
+  { id: 'alert', name: 'Alert', file: alert },
+  { id: 'alert2', name: 'Alert 2', file: alert2 },
+  { id: 'alert3', name: 'Alert 3', file: alert3 },
+  { id: 'alert4', name: 'Alert 4', file: alert4 },
+  { id: 'alert5', name: 'Alert 5', file: alert5 },
+  { id: 'alert6', name: 'Alert 6', file: alert6 },
+
+];
+const playSound = (file) => {
+  const audio = new Audio(file);
+  audio.play();
+};
+
+
+const useStyles = makeStyles((theme) => ({
+  container: {
+    marginTop: theme.spacing(2),
+  },
+  buttons: {
+    marginTop: theme.spacing(2),
+    marginBottom: theme.spacing(2),
+    display: 'flex',
+    justifyContent: 'space-evenly',
+    '& > *': {
+      flexBasis: '33%',
+    },
+  },
+  details: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing(2),
+    paddingBottom: theme.spacing(3),
+  },
+  tokenActions: {
+    display: 'flex',
+    flexDirection: 'column',
+  },
+}));
 
 const PreferencesPage = () => {
   const classes = useSettingsStyles();
@@ -40,6 +108,7 @@ const PreferencesPage = () => {
 
   const user = useSelector((state) => state.session.user);
   const [attributes, setAttributes] = useState(user.attributes);
+  const selectedSoundFile = soundFiles.find(sound => sound.id === attributes.notificationSound);
 
   const versionApp = import.meta.env.VITE_APP_VERSION.slice(0, -2);
   const versionServer = useSelector((state) => state.session.server.version);
@@ -95,7 +164,7 @@ const PreferencesPage = () => {
   return (
     <PageLayout menu={<SettingsMenu />} breadcrumbs={['settingsTitle', 'sharedPreferences']}>
       <Container maxWidth="xs" className={classes.container}>
-        {!readonly && (
+        {!readonly && admin && (
           <>
             <Accordion defaultExpanded>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -155,7 +224,7 @@ const PreferencesPage = () => {
                   freeSolo
                   options={Object.keys(positionAttributes)}
                   getOptionLabel={(option) => (positionAttributes[option]?.name || option)}
-                  value={attributes.positionItems?.split(',') || ['fixTime', 'address', 'speed', 'totalDistance']}
+                  value={attributes.positionItems?.split(',') || ['speed', 'address', 'totalDistance', 'course']}
                   onChange={(_, option) => {
                     setAttributes({ ...attributes, positionItems: option.join(',') });
                   }}
@@ -210,7 +279,7 @@ const PreferencesPage = () => {
                   <FormControlLabel
                     control={(
                       <Checkbox
-                        checked={attributes.hasOwnProperty('mapFollow') ? attributes.mapFollow : false}
+                        checked={attributes.hasOwnProperty('mapFollow') ? attributes.mapFollow : true}
                         onChange={(e) => setAttributes({ ...attributes, mapFollow: e.target.checked })}
                       />
                     )}
@@ -260,6 +329,44 @@ const PreferencesPage = () => {
                 />
               </AccordionDetails>
             </Accordion>
+            </>
+          )}
+            { !admin &&
+              <Accordion defaultExpanded>
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  <Typography variant="subtitle1">
+                    {t('notificationSound')} 
+                  </Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <FormControl fullWidth>
+                    <InputLabel>{t('notificationSound')}</InputLabel>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <Select
+                        value={attributes.notificationSound || 'default'}
+                        onChange={(e) => setAttributes({ ...attributes, notificationSound: e.target.value })}
+                        style={{ flex: 1 }}
+                        label={t('notificationSound')}  
+                      >
+                        {soundFiles.map((sound) => (
+                          <MenuItem key={sound.id} value={sound.id}>
+                            {sound.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      <IconButton
+                        size="small"
+                        onClick={() => selectedSoundFile && playSound(selectedSoundFile.file)}
+                        style={{ marginLeft: '8px' }}
+                        disabled={!selectedSoundFile}
+                      >
+                        <PlayArrowIcon />
+                      </IconButton>
+                    </div>
+                  </FormControl>
+                </AccordionDetails>
+              </Accordion>
+            }
             <Accordion>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <Typography variant="subtitle1">
@@ -286,8 +393,8 @@ const PreferencesPage = () => {
                 />
               </AccordionDetails>
             </Accordion>
-          </>
-        )}
+
+  
         <Accordion>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Typography variant="subtitle1">
@@ -351,13 +458,15 @@ const PreferencesPage = () => {
                   label={t('settingsConnection')}
                   disabled
                 />
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  onClick={() => navigate('/emulator')}
-                >
-                  {t('sharedEmulator')}
-                </Button>
+                {admin && (
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    onClick={() => navigate('/emulator')}
+                  >
+                    {t('sharedEmulator')}
+                  </Button>
+                )}
                 {admin && (
                   <Button
                     variant="outlined"

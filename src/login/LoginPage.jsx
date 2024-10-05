@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import {
-  useMediaQuery, Select, MenuItem, FormControl, Button, TextField, Link, Snackbar, IconButton, Tooltip, Box,
+  useMediaQuery,InputLabel, Select, MenuItem, FormControl, Button, TextField, Link, Snackbar, IconButton, Tooltip, Box,
 } from '@mui/material';
+import InputAdornment from '@mui/material/InputAdornment';// İmport satırını ekledim
+import VisibilityIcon from '@mui/icons-material/Visibility';// İmport satırını ekledim
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';// İmport 
 import ReactCountryFlag from 'react-country-flag';
 import makeStyles from '@mui/styles/makeStyles';
 import CloseIcon from '@mui/icons-material/Close';
@@ -74,6 +77,13 @@ const LoginPage = () => {
 
   const [announcementShown, setAnnouncementShown] = useState(false);
   const announcement = useSelector((state) => state.session.server.announcement);
+  
+   
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleTogglePassword = () => {
+    setShowPassword(!showPassword);
+  };
 
   const generateLoginToken = async () => {
     if (nativeEnvironment) {
@@ -191,10 +201,19 @@ const LoginPage = () => {
           label={t('userPassword')}
           name="password"
           value={password}
-          type="password"
+          type={showPassword ? 'text' : 'password'}
           autoComplete="current-password"
           autoFocus={!!email}
           onChange={(e) => setPassword(e.target.value)}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton onClick={handleTogglePassword} edge="end">
+                  {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
         />
         {codeEnabled && (
           <TextField

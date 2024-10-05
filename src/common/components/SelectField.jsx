@@ -39,6 +39,17 @@ const SelectField = ({
     }
   }, []);
 
+  const ITEM_HEIGHT = 70;
+  const ITEM_PADDING_TOP = 8;
+  const MenuProps = {
+    PaperProps: {
+      style: {
+        maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+        width: 180,
+      },
+    },
+  };
+
   if (items) {
     return (
       <FormControl fullWidth={fullWidth}>
@@ -50,6 +61,8 @@ const SelectField = ({
               multiple
               value={value}
               onChange={onChange}
+              MenuProps={MenuProps}
+
             >
               {items.map((item) => (
                 <MenuItem key={keyGetter(item)} value={keyGetter(item)}>{titleGetter(item)}</MenuItem>

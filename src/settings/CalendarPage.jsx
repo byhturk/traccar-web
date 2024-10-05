@@ -15,6 +15,8 @@ import { prefixString } from '../common/util/stringUtils';
 import { calendarsActions } from '../store';
 import { useCatch } from '../reactHelper';
 import useSettingsStyles from './common/useSettingsStyles';
+import { useAdministrator } from '../common/util/permissions';
+
 
 const formatCalendarTime = (time) => {
   const tzid = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -67,6 +69,8 @@ const CalendarPage = () => {
   const t = useTranslation();
 
   const [item, setItem] = useState();
+  const admin = useAdministrator();
+
 
   const decoded = item && item.data && window.atob(item.data);
 
@@ -194,11 +198,14 @@ const CalendarPage = () => {
               )}
             </AccordionDetails>
           </Accordion>
-          <EditAttributesAccordion
-            attributes={item.attributes}
-            setAttributes={(attributes) => setItem({ ...item, attributes })}
-            definitions={{}}
-          />
+          {admin && 
+
+            <EditAttributesAccordion
+              attributes={item.attributes}
+              setAttributes={(attributes) => setItem({ ...item, attributes })}
+              definitions={{}}
+            />
+          }
         </>
       )}
     </EditItemView>

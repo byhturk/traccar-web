@@ -210,4 +210,11 @@ export default (t) => useMemo(() => ({
       type: 'string',
     },
   ],
+  alarmVibrationlevel: [
+    {
+      key: 'alarmSensorlevel',
+      name: t('commandAlarmSensorlevel'),
+      type: 'string',
+    },
+  ],
 }), [t]);

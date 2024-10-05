@@ -145,4 +145,12 @@ export default (t) => useMemo(() => ({
     name: t('attributeNavigationAppTitle'),
     type: 'string',
   },
+  'ui.disableSms': {
+    name: t('attributeUiDisableSms'),
+    type: 'boolean',
+  },
+  'smsLimit': {
+    name: t('notificatorSms') ,
+    type: 'number',
+  },
 }), [t]);

@@ -26,4 +26,8 @@ export default (t) => useMemo(() => ({
     name: t('attributeDeviceInactivityPeriod'),
     type: 'number',
   },
+  blokajkiti: {//takipon//
+    name: t('positionBlocked'),
+    type: 'boolean',
+  },
 }), [t]);

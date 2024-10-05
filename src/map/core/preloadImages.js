@@ -26,6 +26,7 @@ import tramSvg from '../../resources/images/icon/tram.svg';
 import trolleybusSvg from '../../resources/images/icon/trolleybus.svg';
 import truckSvg from '../../resources/images/icon/truck.svg';
 import vanSvg from '../../resources/images/icon/van.svg';
+import lockedSvg from '../../resources/images/icon/locked.svg';
 
 export const mapIcons = {
   animal: animalSvg,
@@ -50,7 +51,10 @@ export const mapIcons = {
   trolleybus: trolleybusSvg,
   truck: truckSvg,
   van: vanSvg,
+  locked: lockedSvg,
+
 };
+  {/*locked eklendi*takion locked kilit güncelleme blocked */}
 
 export const mapIconKey = (category) => (mapIcons.hasOwnProperty(category) ? category : 'default');
 

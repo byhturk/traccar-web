@@ -11,6 +11,7 @@ import BatteryCharging60Icon from '@mui/icons-material/BatteryCharging60';
 import Battery20Icon from '@mui/icons-material/Battery20';
 import BatteryCharging20Icon from '@mui/icons-material/BatteryCharging20';
 import ErrorIcon from '@mui/icons-material/Error';
+import LockIcon from '@mui/icons-material/Lock';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { devicesActions } from '../store';
@@ -85,11 +86,19 @@ const DeviceRow = ({ data, index, style }) => {
         onClick={() => dispatch(devicesActions.selectId(item.id))}
         disabled={!admin && item.disabled}
       >
-        <ListItemAvatar>
-          <Avatar>
-            <img className={classes.icon} src={mapIcons[mapIconKey(item.category)]} alt="" />
-          </Avatar>
+        {/* ---takipon güncellemesi - blocked cihaz kilit simgesi------------------------*/}
+        <ListItemAvatar> 
+          {position && position.attributes && position.attributes.hasOwnProperty('blocked') && position.attributes.blocked ? (
+            <Avatar>
+              <LockIcon style={{ color: 'red' }} />
+            </Avatar>
+          ) : (
+            <Avatar>
+              <img className={classes.icon} src={mapIcons[mapIconKey(item.category)]} alt="" />
+            </Avatar>
+          )}
         </ListItemAvatar>
+        {/* ---takipon güncellemesi - blocked cihaz kilit simgesi------------------------*/}
         <ListItemText
           primary={item[devicePrimary]}
           primaryTypographyProps={{ noWrap: true }}
@@ -119,15 +128,15 @@ const DeviceRow = ({ data, index, style }) => {
             {position.attributes.hasOwnProperty('batteryLevel') && (
               <Tooltip title={`${t('positionBatteryLevel')}: ${formatPercentage(position.attributes.batteryLevel)}`}>
                 <IconButton size="small">
-                  {(position.attributes.batteryLevel > 70 && (
+                  {position.attributes.batteryLevel > 70 ? (
                     position.attributes.charge
                       ? (<BatteryChargingFullIcon fontSize="small" className={classes.success} />)
                       : (<BatteryFullIcon fontSize="small" className={classes.success} />)
-                  )) || (position.attributes.batteryLevel > 30 && (
+                  ) : position.attributes.batteryLevel > 30 ? (
                     position.attributes.charge
                       ? (<BatteryCharging60Icon fontSize="small" className={classes.warning} />)
                       : (<Battery60Icon fontSize="small" className={classes.warning} />)
-                  )) || (
+                  ) : (
                     position.attributes.charge
                       ? (<BatteryCharging20Icon fontSize="small" className={classes.error} />)
                       : (<Battery20Icon fontSize="small" className={classes.error} />)

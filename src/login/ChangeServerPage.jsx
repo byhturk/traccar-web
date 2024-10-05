@@ -11,13 +11,9 @@ const currentServer = `${window.location.protocol}//${window.location.host}`;
 
 const officialServers = [
   currentServer,
-  'https://demo.traccar.org',
-  'https://demo2.traccar.org',
-  'https://demo3.traccar.org',
-  'https://demo4.traccar.org',
-  'https://server.traccar.org',
-  'http://localhost:8082',
-  'http://localhost:3000',
+  'https://s1.takipon.com',
+  'https://s2.takioon.com',
+  'https://test.takipon.com',
 ];
 
 const useStyles = makeStyles((theme) => ({

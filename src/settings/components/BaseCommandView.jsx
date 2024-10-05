@@ -7,6 +7,8 @@ import { useTranslation } from '../../common/components/LocalizationProvider';
 import SelectField from '../../common/components/SelectField';
 import { prefixString } from '../../common/util/stringUtils';
 import useCommandAttributes from '../../common/attributes/useCommandAttributes';
+import { useAdministrator } from '../../common/util/permissions';
+
 
 const BaseCommandView = ({ deviceId, item, setItem }) => {
   const t = useTranslation();
@@ -16,6 +18,8 @@ const BaseCommandView = ({ deviceId, item, setItem }) => {
   const availableAttributes = useCommandAttributes(t);
 
   const [attributes, setAttributes] = useState([]);
+  const admin = useAdministrator();
+
 
   useEffect(() => {
     if (item && item.type) {
@@ -66,7 +70,7 @@ const BaseCommandView = ({ deviceId, item, setItem }) => {
           />
         );
       })}
-      {textEnabled && (
+      {textEnabled && admin && (
         <FormControlLabel
           control={<Checkbox checked={item.textChannel} onChange={(event) => setItem({ ...item, textChannel: event.target.checked })} />}
           label={t('commandSendSms')}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   Accordion,
@@ -27,6 +27,8 @@ const CommandDevicePage = () => {
 
   const [savedId, setSavedId] = useState(0);
   const [item, setItem] = useState({});
+  const [blokajKiti, setBlokajKiti] = useState(false);
+
 
   const limitCommands = useRestriction('limitCommands');
 
@@ -57,6 +59,22 @@ const CommandDevicePage = () => {
       throw Error(await response.text());
     }
   });
+  
+  useEffect(() => {
+    const fetchDeviceAttributes = async () => {
+      const response = await fetch(`/api/devices/${id}`);
+      if (response.ok) {
+        const device = await response.json();
+        if (device.attributes && device.attributes.blokajkiti) {
+          setBlokajKiti(device.attributes.blokajkiti);
+        }
+      } else {
+        console.error('Failed to fetch device attributes');
+      }
+    };
+
+    fetchDeviceAttributes();
+  }, [id]);
 
   const validate = () => savedId || (item && item.type);
 
@@ -73,7 +91,7 @@ const CommandDevicePage = () => {
             <SelectField
               value={savedId}
               emptyValue={limitCommands ? null : 0}
-              emptyTitle={t('sharedNew')}
+              emptyTitle={t('settingsTitle')}
               onChange={(e) => setSavedId(e.target.value)}
               endpoint={`/api/commands/send?deviceId=${id}`}
               titleGetter={(it) => it.description}
@@ -81,6 +99,11 @@ const CommandDevicePage = () => {
             />
             {!limitCommands && !savedId && (
               <BaseCommandView deviceId={id} item={item} setItem={setItem} />
+            )}
+            {!blokajKiti && (
+              <Typography className={classes.alert} color="primary" style={{ fontStyle: 'italic' }}>
+                {t('blokajaciklama')}
+              </Typography>
             )}
           </AccordionDetails>
         </Accordion>

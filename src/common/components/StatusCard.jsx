@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import dayjs from 'dayjs';
 import Draggable from 'react-draggable';
 import {
   Card,
@@ -15,6 +16,12 @@ import {
   Menu,
   MenuItem,
   CardMedia,
+  Dialog,
+  TextField,
+  DialogActions,
+  DialogContent,
+  Button,
+  Tooltip,
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import CloseIcon from '@mui/icons-material/Close';
@@ -23,17 +30,74 @@ import PublishIcon from '@mui/icons-material/Publish';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PendingIcon from '@mui/icons-material/Pending';
-
+import HistoryIcon from '@mui/icons-material/History';
+import SettingsIcon from '@mui/icons-material/Settings';
+import PowerIcon from '@mui/icons-material/Power';
+import SatelliteAltIcon from '@mui/icons-material/SatelliteAlt';
+import BlockIcon from '@mui/icons-material/Block';
+import BoltIcon from '@mui/icons-material/Bolt';
+import SpeedIcon from '@mui/icons-material/Speed';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import RouteIcon from '@mui/icons-material/Route';
+import NavigationIcon from '@mui/icons-material/Navigation';
+import InsertLinkIcon from '@mui/icons-material/InsertLink';
+import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
+import SignalCellular0BarIcon from '@mui/icons-material/SignalCellular0Bar';
+import SignalCellular1BarIcon from '@mui/icons-material/SignalCellular1Bar';
+import SignalCellular2BarIcon from '@mui/icons-material/SignalCellular2Bar';
+import SignalCellular3BarIcon from '@mui/icons-material/SignalCellular3Bar';
+import SignalCellular4BarIcon from '@mui/icons-material/SignalCellular4Bar';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import NetworkCheckIcon from '@mui/icons-material/NetworkCheck';
+import FenceIcon from '@mui/icons-material/Fence';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import BatteryChargingFullIcon from '@mui/icons-material/BatteryChargingFull';
+import BatteryAlertIcon from '@mui/icons-material/BatteryAlert';
+import Battery4BarIcon from '@mui/icons-material/Battery4Bar';
+import SignalCellularAltIcon from '@mui/icons-material/SignalCellularAlt';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import {
+  formatAlarm, formatBoolean, formatIgnition, formatPercentage, formatStatus, getStatusColor,
+} from '../../common/util/formatter';
 import { useTranslation } from './LocalizationProvider';
 import RemoveDialog from './RemoveDialog';
 import PositionValue from './PositionValue';
-import { useDeviceReadonly } from '../util/permissions';
+import { useAdministrator, useDeviceReadonly, useRestriction } from '../util/permissions';
 import usePositionAttributes from '../attributes/usePositionAttributes';
 import { devicesActions } from '../../store';
 import { useCatch, useCatchCallback } from '../../reactHelper';
 import { useAttributePreference } from '../util/preferences';
+import EngineIcon from '../../resources/images/data/engine.svg?react';
+
+
+const iconMapping = {
+  speed: <SpeedIcon color="primary" />,
+  address: <LocationOnIcon color="primary" />,
+  totalDistance: <RouteIcon color="primary" />,
+  course: <NavigationIcon color="primary" />,
+  ignition: <PowerIcon color="primary" />,
+  alarm: <NotificationsActiveIcon color="error" />,
+  blocked: <BlockIcon color="error" />,
+  power: <BoltIcon color="primary" />,
+  serverTime: <AccessTimeIcon color="primary" />,
+  deviceTime: <AccessTimeIcon color="primary" />,
+  fixTime: <AccessTimeIcon color="primary" />,
+  network: <NetworkCheckIcon color="primary" />,
+  geofenceIds: <FenceIcon color="primary" />,
+  sat: <SatelliteAltIcon color="primary" />,
+  distance: <RouteIcon color="primary" />,
+  motion: <TrendingUpIcon color="primary" />,
+  charge: <BatteryChargingFullIcon color="primary" />,
+  batteryLevel: <Battery4BarIcon color="primary" />,
+  rssi: <SignalCellularAltIcon color="primary" />,
+  result: <ThumbUpIcon color="primary" />,
+};
 
 const useStyles = makeStyles((theme) => ({
+  iconContainer: {
+    display: 'flex',
+    alignItems: 'center',
+  },
   card: {
     pointerEvents: 'auto',
     width: theme.dimensions.popupMaxWidth,
@@ -63,7 +127,7 @@ const useStyles = makeStyles((theme) => ({
   icon: {
     width: '25px',
     height: '25px',
-    filter: 'brightness(0) invert(1)',
+    marginRight: theme.spacing(1),
   },
   table: {
     '& .MuiTableCell-sizeSmall': {
@@ -92,15 +156,43 @@ const useStyles = makeStyles((theme) => ({
     },
     transform: 'translateX(-50%)',
   }),
+  iconIgnition: {
+    width: '25px',
+    height: '25px',
+    filter: 'brightness(0) invert(1)',
+  },
+  batteryText: {
+    fontSize: '0.75rem',
+    fontWeight: 'normal',
+    lineHeight: '0.875rem',
+  },
+  success: {
+    color: theme.palette.success.main,
+  },
+  warning: {
+    color: theme.palette.warning.main,
+  },
+  error: {
+    color: theme.palette.error.main,
+  },
+  neutral: {
+    color: theme.palette.neutral.main,
+  },
+
 }));
 
-const StatusRow = ({ name, content }) => {
+const StatusRow = ({ name, content, icon }) => {
   const classes = useStyles();
 
   return (
     <TableRow>
       <TableCell className={classes.cell}>
+      <div className={classes.iconContainer}>
+          <div className={classes.icon}>
+            {icon}
+          </div>
         <Typography variant="body2">{name}</Typography>
+      </div>
       </TableCell>
       <TableCell className={classes.cell}>
         <Typography variant="body2" color="textSecondary">{content}</Typography>
@@ -109,6 +201,51 @@ const StatusRow = ({ name, content }) => {
   );
 };
 
+const getRssiIcon = (rssi) => {
+  let IconComponent;
+  let color;
+
+  if (rssi >= 0 && rssi <= 15) {
+    IconComponent = SignalCellular0BarIcon;
+    color = '#8a3227'; 
+  } else if (rssi > 15 && rssi <= 45) {
+    IconComponent = SignalCellular1BarIcon;
+    color = '#4DB6AC'; 
+  } else if (rssi > 45 && rssi <= 70) {
+    IconComponent = SignalCellular2BarIcon;
+    color = '#00959E'; // gri tonlarında bir renk
+  } else if (rssi > 70 && rssi <= 90) {
+    IconComponent = SignalCellular3BarIcon;
+    color = '#00959E'; // yeşil-gri tonlarında bir renk
+  } else if (rssi > 90 && rssi <= 100) {
+    IconComponent = SignalCellular4BarIcon;
+    color = '#00959E'; // tema rengi
+  }
+
+  return <IconComponent style={{ color,  width: 20, height: 20 }} />;
+};
+
+
+function getSatelliteIcon(sat) {
+  let color;
+
+  if (sat === 0) {
+    color = '#F44336'; // Kırmızı renk
+  } else if (sat >= 1 && sat <= 5) {
+    color = '#90A4AE'; // Gri tonlarında bir renk
+  } else if (sat >= 6 && sat <= 8) {
+    color = '#78909C'; // Gri tonlarında bir renk
+  } else if (sat >= 9 && sat <= 10) {
+    color = '#00959E'; // Gri tonlarında bir renk
+  } else if (sat >= 11 && sat <= 15) {
+    color = '#00959E'; // Tema rengi
+  }
+
+  return <SatelliteAltIcon style={{ color ,  width: 20, height: 20 }} />;
+}
+
+
+
 const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPadding = 0 }) => {
   const classes = useStyles({ desktopPadding });
   const navigate = useNavigate();
@@ -116,6 +253,8 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
   const t = useTranslation();
 
   const deviceReadonly = useDeviceReadonly();
+  const admin = useAdministrator();
+  const userReadonly = useRestriction('readonly');
 
   const shareDisabled = useSelector((state) => state.session.server.attributes.disableShare);
   const user = useSelector((state) => state.session.user);
@@ -124,7 +263,7 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
   const deviceImage = device?.attributes?.deviceImage;
 
   const positionAttributes = usePositionAttributes(t);
-  const positionItems = useAttributePreference('positionItems', 'fixTime,address,speed,totalDistance');
+  const positionItems = useAttributePreference('positionItems', 'speed,address,totalDistance,power,alarm');
 
   const navigationAppLink = useAttributePreference('navigationAppLink');
   const navigationAppTitle = useAttributePreference('navigationAppTitle');
@@ -194,9 +333,51 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
                 </CardMedia>
               ) : (
                 <div className={classes.header}>
-                  <Typography variant="body2" color="textSecondary">
-                    {device.name}
-                  </Typography>
+                  {position && position.attributes && position.attributes.hasOwnProperty('ignition') && (
+                    <Tooltip title={`${formatIgnition(position.attributes.ignition, t)}`}>
+                      <IconButton size="small">
+                        {position.attributes.ignition ? (
+                          <EngineIcon className={classes.success} style={{ width: 25, height: 25 }}  />
+                        ) : (
+                          <EngineIcon className={classes.neutral} style={{ width: 25, height: 25 }}/>
+                        )}
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                  {position && position.attributes && position.attributes.hasOwnProperty('sat') && (
+                    <Tooltip title={`${t('positionSat')}: ${parseInt(position.attributes.sat, t)}`}>
+                      <IconButton size="small">
+                        {getSatelliteIcon(parseInt(position.attributes.sat))}
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                  {position && position.attributes && position.attributes.hasOwnProperty('rssi') && (
+                    <Tooltip title={`${t('positionRssi')}: ${formatPercentage(position.attributes.rssi, t)}`}>
+                      <IconButton size="small">
+                        {getRssiIcon(parseInt(position.attributes.rssi))}
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                  {position && position.attributes && position.attributes.hasOwnProperty('charge') && (
+                    <Tooltip title={`${t('positionCharge')}: ${formatBoolean(position.attributes.charge, t)}`}>
+                      <IconButton size="small">
+                        {position.attributes.charge ? (
+                          <BatteryChargingFullIcon style={{color: "#00959E", width: 25, height: 25 }}  />
+                        ) : (
+                          <BatteryAlertIcon className={classes.error} style={{ width: 25, height: 25 }}/>
+                        )}
+                      </IconButton>
+                    </Tooltip>
+                  )}
+
+
+                  {position && position.attributes && position.attributes.hasOwnProperty('result') && (
+                    <Tooltip title={t('commandSent')}>
+                      <IconButton size="small">
+                       <ThumbUpIcon className={classes.success} style={{ width: 20, height: 20 }}  />
+                      </IconButton>
+                    </Tooltip>
+                  )}
                   <IconButton
                     size="small"
                     onClick={onClose}
@@ -208,21 +389,63 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
               )}
               {position && (
                 <CardContent className={classes.content}>
+                  {device.status === "online" ? (
+                    <Typography color="primary" style={{ textAlign: 'center' }}>
+                      {device.name}
+                    </Typography>
+                  ) : (
+                    <Typography color="error" style={{ textAlign: 'center' }}>
+                      {device.name} <br />
+                      {t("eventDeviceOffline")}
+                    </Typography>
+                  )}
                   <Table size="small" classes={{ root: classes.table }}>
-                    <TableBody>
-                      {positionItems.split(',').filter((key) => position.hasOwnProperty(key) || position.attributes.hasOwnProperty(key)).map((key) => (
-                        <StatusRow
-                          key={key}
-                          name={positionAttributes[key]?.name || key}
-                          content={(
-                            <PositionValue
-                              position={position}
-                              property={position.hasOwnProperty(key) ? key : null}
-                              attribute={position.hasOwnProperty(key) ? null : key}
-                            />
-                          )}
-                        />
-                      ))}
+                  <TableBody>
+                      {positionItems.split(',').filter((key) => position.hasOwnProperty(key) || position.attributes.hasOwnProperty(key)).map((key) => {
+                        let icon = null;
+
+                        // İlgili özelliklere göre uygun ikonları belirle
+                        switch (key) {
+                          case 'speed':
+                          case 'address':
+                          case 'totalDistance':
+                          case 'course':
+                          case 'ignition':
+                          case 'alarm':
+                          case 'blocked':
+                          case 'power':
+                          case 'serverTime':
+                          case 'deviceTime':
+                          case 'fixTime':
+                          case 'network':
+                          case 'geofenceIds':
+                          case 'sat':
+                          case 'distance':
+                          case 'motion':
+                          case 'charge':
+                          case 'batteryLevel':
+                          case 'rssi':
+                          case 'result':
+                            icon = iconMapping[key];
+                            break;
+                          default:
+                            break;
+                        }
+                        return (
+                          <StatusRow
+                            key={key}
+                            name={positionAttributes.hasOwnProperty(key) ? positionAttributes[key].name : key}
+                            content={(
+                              <PositionValue
+                                position={position}
+                                property={position.hasOwnProperty(key) ? key : null}
+                                attribute={position.hasOwnProperty(key) ? null : key}
+                              />
+                            )}
+                            icon={icon}
+                          />
+                        );
+                      })}
                     </TableBody>
                   </Table>
                 </CardContent>
@@ -231,21 +454,27 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
                 <IconButton
                   color="secondary"
                   onClick={(e) => setAnchorEl(e.currentTarget)}
-                  disabled={!position}
+                  disabled={!position  || userReadonly}
                 >
                   <PendingIcon />
                 </IconButton>
                 <IconButton
                   onClick={() => navigate('/replay')}
-                  disabled={disableActions || !position}
+                  disabled={disableActions || !position || userReadonly}
                 >
-                  <ReplayIcon />
+                  <HistoryIcon />
                 </IconButton>
                 <IconButton
                   onClick={() => navigate(`/settings/device/${deviceId}/command`)}
-                  disabled={disableActions}
+                  disabled={disableActions || userReadonly}
                 >
-                  <PublishIcon />
+                  <SettingsIcon />
+                  </IconButton>
+                <IconButton
+                    onClick={() => navigate(`/settings/device/${deviceId}/connections`)}
+                    disabled={disableActions || userReadonly}
+                  >
+                    <InsertLinkIcon />
                 </IconButton>
                 <IconButton
                   onClick={() => navigate(`/settings/device/${deviceId}`)}
@@ -253,13 +482,15 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
                 >
                   <EditIcon />
                 </IconButton>
-                <IconButton
-                  color="error"
-                  onClick={() => setRemoving(true)}
-                  disabled={disableActions || deviceReadonly}
-                >
-                  <DeleteIcon />
-                </IconButton>
+                {admin && (//takipon
+                  <IconButton
+                    onClick={() => setRemoving(true)}
+                    disabled={disableActions || deviceReadonly}
+                    className={classes.negative}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                )}
               </CardActions>
             </Card>
           </Draggable>
@@ -267,13 +498,16 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
       </div>
       {position && (
         <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
+          {admin && (
+
           <MenuItem onClick={() => navigate(`/position/${position.id}`)}><Typography color="secondary">{t('sharedShowDetails')}</Typography></MenuItem>
-          <MenuItem onClick={handleGeofence}>{t('sharedCreateGeofence')}</MenuItem>
+          )} 
+          <MenuItem onClick={handleGeofence}><Typography color="secondary">{t('sharedCreateGeofence')}</Typography></MenuItem>
           <MenuItem component="a" target="_blank" href={`https://www.google.com/maps/search/?api=1&query=${position.latitude}%2C${position.longitude}`}>{t('linkGoogleMaps')}</MenuItem>
           <MenuItem component="a" target="_blank" href={`http://maps.apple.com/?ll=${position.latitude},${position.longitude}`}>{t('linkAppleMaps')}</MenuItem>
           <MenuItem component="a" target="_blank" href={`https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${position.latitude}%2C${position.longitude}&heading=${position.course}`}>{t('linkStreetView')}</MenuItem>
           {navigationAppTitle && <MenuItem component="a" target="_blank" href={navigationAppLink.replace('{latitude}', position.latitude).replace('{longitude}', position.longitude)}>{navigationAppTitle}</MenuItem>}
-          {!shareDisabled && !user.temporary && <MenuItem onClick={() => navigate(`/settings/device/${deviceId}/share`)}>{t('deviceShare')}</MenuItem>}
+          {!shareDisabled && !user.temporary && <MenuItem onClick={() => navigate(`/settings/device/${deviceId}/share`)}><Typography color="primary">{t('deviceShare')}</Typography></MenuItem>}
         </Menu>
       )}
       <RemoveDialog

@@ -23,13 +23,15 @@ import { useTranslation } from '../common/components/LocalizationProvider';
 import usePositionAttributes from '../common/attributes/usePositionAttributes';
 import SettingsMenu from './components/SettingsMenu';
 import useSettingsStyles from './common/useSettingsStyles';
+import { useAdministrator } from '../common/util/permissions';
+
 
 const MaintenancePage = () => {
   const classes = useSettingsStyles();
   const t = useTranslation();
 
   const positionAttributes = usePositionAttributes(t);
-
+  const admin = useAdministrator();
   const [item, setItem] = useState();
   const [labels, setLabels] = useState({ start: '', period: '' });
 
@@ -139,7 +141,7 @@ const MaintenancePage = () => {
               <TextField
                 value={item.name || ''}
                 onChange={(e) => setItem({ ...item, name: e.target.value })}
-                label={t('sharedName')}
+                label={t('bakımisim')}
               />
               <FormControl>
                 <InputLabel>{t('sharedType')}</InputLabel>
@@ -148,9 +150,16 @@ const MaintenancePage = () => {
                   value={item.type || ''}
                   onChange={(e) => setItem({ ...item, type: e.target.value, start: 0, period: 0 })}
                 >
-                  {convertToList(positionAttributes).map(({ key, name }) => (
-                    <MenuItem key={key} value={key}>{name}</MenuItem>
-                  ))}
+                  {
+                    convertToList(positionAttributes)
+                      .filter(({ key }) => (admin ? true : key === 'totalDistance'))
+                      .map(({ key, name }) => (
+                        <MenuItem key={key} value={key}>
+                          {name}
+                        </MenuItem>
+                      ))
+                  }
+
                 </Select>
               </FormControl>
               <TextField
@@ -167,11 +176,15 @@ const MaintenancePage = () => {
               />
             </AccordionDetails>
           </Accordion>
+          {admin && 
+
           <EditAttributesAccordion
             attributes={item.attributes}
             setAttributes={(attributes) => setItem({ ...item, attributes })}
             definitions={{}}
           />
+         }
+
         </>
       )}
     </EditItemView>

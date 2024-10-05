@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
+
 
 import {
   Accordion,
@@ -19,10 +21,14 @@ import SelectField from '../common/components/SelectField';
 import SettingsMenu from './components/SettingsMenu';
 import { useCatch } from '../reactHelper';
 import useSettingsStyles from './common/useSettingsStyles';
+import useFeatures from '../common/util/useFeatures';/** features ekledik */
+import { useAdministrator } from '../common/util/permissions';
 
 const NotificationPage = () => {
   const classes = useSettingsStyles();
   const t = useTranslation();
+  const admin = useAdministrator();
+
 
   const [item, setItem] = useState();
 
@@ -30,6 +36,9 @@ const NotificationPage = () => {
     key: unprefixString('alarm', it),
     name: t(it),
   }));
+
+  const features = useFeatures(); /* tanımlama yaptık */
+
 
   const testNotificators = useCatch(async () => {
     await Promise.all(item.notificators.split(/[, ]+/).map(async (notificator) => {
@@ -43,6 +52,11 @@ const NotificationPage = () => {
       }
     }));
   });
+
+  const user = useSelector((state) => state.session.user);
+  const [attributes] = useState(user.attributes);
+  const smsLimit = attributes.smsLimit;
+
 
   const validate = () => item && item.type && item.notificators && (!item.notificators?.includes('command') || item.commandId);
 
@@ -84,8 +98,8 @@ const NotificationPage = () => {
               )}
               <SelectField
                 multiple
-                value={item.notificators ? item.notificators.split(/[, ]+/) : []}
-                onChange={(e) => setItem({ ...item, notificators: e.target.value.join() })}
+                value={item.notificators ? (features.disableSms ? item.notificators.split(/[, ]+/).filter((value) => value !== 'sms') : item.notificators.split(/[, ]+/)) : []}
+                onChange={(e) => setItem({ ...item, notificators: features.disableSms ? e.target.value.filter((value) => value !== 'sms').join() : e.target.value.join() })}
                 endpoint="/api/notifications/notificators"
                 keyGetter={(it) => it.type}
                 titleGetter={(it) => t(prefixString('notificator', it.type))}
@@ -99,6 +113,16 @@ const NotificationPage = () => {
                   titleGetter={(it) => it.description}
                   label={t('sharedSavedCommand')}
                 />
+              )}
+              {features.disableSms && (
+                <Typography variant="body2" color="secondary" >
+                  SMS paketiniz Mevcut değil.
+                </Typography>
+              )}
+              {smsLimit >= 0 && !features.disableSms && (
+                <Typography className={classes.smsLimit} variant="body2"  color="primary" style={{ fontStyle: 'italic' }}>
+                  {t('notificatorSms')} {t('userUserLimit')} :{smsLimit ? smsLimit : 0 }
+                </Typography>
               )}
               <Button
                 variant="outlined"

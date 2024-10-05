@@ -20,6 +20,7 @@ dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);
 
 export const formatBoolean = (value, t) => (value ? t('sharedYes') : t('sharedNo'));
+export const formatIgnition = (value, t) => (value ? t('eventIgnitionOn') : t('eventIgnitionOff'));
 
 export const formatNumber = (value, precision = 1) => Number(value.toFixed(precision));
 

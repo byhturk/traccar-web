@@ -15,6 +15,8 @@ import CollectionActions from './components/CollectionActions';
 import TableShimmer from '../common/components/TableShimmer';
 import SearchHeader, { filterByKeyword } from './components/SearchHeader';
 import useSettingsStyles from './common/useSettingsStyles';
+import { useAdministrator } from '../common/util/permissions';
+
 
 const MaintenacesPage = () => {
   const classes = useSettingsStyles();
@@ -28,6 +30,8 @@ const MaintenacesPage = () => {
   const [loading, setLoading] = useState(false);
   const speedUnit = useAttributePreference('speedUnit');
   const distanceUnit = useAttributePreference('distanceUnit');
+  const admin = useAdministrator();
+
 
   useEffectAsync(async () => {
     setLoading(true);
@@ -74,7 +78,11 @@ const MaintenacesPage = () => {
         <TableHead>
           <TableRow>
             <TableCell>{t('sharedName')}</TableCell>
+            {admin && 
+
             <TableCell>{t('sharedType')}</TableCell>
+          }
+
             <TableCell>{t('maintenanceStart')}</TableCell>
             <TableCell>{t('maintenancePeriod')}</TableCell>
             <TableCell className={classes.columnAction} />
@@ -84,7 +92,11 @@ const MaintenacesPage = () => {
           {!loading ? items.filter(filterByKeyword(searchKeyword)).map((item) => (
             <TableRow key={item.id}>
               <TableCell>{item.name}</TableCell>
+              {admin && 
+
               <TableCell>{item.type}</TableCell>
+            }
+
               <TableCell>{convertAttribute(item.type, true, item.start)}</TableCell>
               <TableCell>{convertAttribute(item.type, false, item.period)}</TableCell>
               <TableCell className={classes.columnAction} padding="none">
