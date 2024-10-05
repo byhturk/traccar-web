@@ -331,7 +331,7 @@ const PreferencesPage = () => {
             </Accordion>
             </>
           )}
-            { !admin &&
+            { isAppleDevice &&
               <Accordion defaultExpanded>
                 <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                   <Typography variant="subtitle1">
