@@ -621,7 +621,6 @@
     "commandAlarmVibrationon": "Vibration Alarm Active",
     "commandAlarmVibrationoff": "Vibration Alarm Inactive",
     "attributeUiDisableSms": "SMS Disabled",
-    "sharedCopy": "Copy",
     "reportLast1": "Last 1 Hour",
     "reportLast4": "Last 4 Hours",
     "mainpageTitle": "Homepage",
