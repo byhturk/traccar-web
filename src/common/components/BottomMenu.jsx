@@ -190,16 +190,23 @@ const BottomMenu = () => {
   return (
     <Paper square elevation={6}>
       <BottomNavigation value={currentSelection()} onChange={handleSelection} showLabels>
-        
+      {!disableReports ?
         <BottomNavigationAction
           label={t('dashboardTitle')}
           icon={(
-            <Badge color="error" variant="dot" overlap="circular" invisible={socket !== false}>
               <HomeIcon />
-            </Badge>
           )}
           value="dashboard"
         />
+        :
+        <BottomNavigationAction
+        label={t('dashboardTitle')}
+        icon={(
+            <HomeIcon />
+        )}
+        value=""
+      />
+        }
         <BottomNavigationAction
           label={t('mapTitle')}
           icon={(
@@ -214,7 +221,7 @@ const BottomMenu = () => {
         ) : (
           <BottomNavigationAction label={t('reportTitle')} icon={<DescriptionIcon />} value="reports" onClick={handleReportsMenuToggle} />
         )) : (
-          <BottomNavigationAction label={t('reportTitle')} icon={<DescriptionIcon />} value="yetkisiz" />
+          <BottomNavigationAction label={t('reportTitle')} icon={<DescriptionIcon />} value="" />
         )}
         {readonly ? (
           <BottomNavigationAction label={t('loginLogout')} icon={<ExitToAppIcon />} value="logout" />

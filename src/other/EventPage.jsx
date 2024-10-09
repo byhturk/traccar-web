@@ -90,7 +90,7 @@ const EventPage = () => {
       <div className={classes.mapContainer}>
         <MapView>
           <MapGeofence />
-          {position && <MapPositions positions={[position]} onClick={onMarkerClick} titleField="serverTime" />}
+          {position && <MapPositions positions={[position]} onClick={onMarkerClick} titleField="fixTime" />}
         </MapView>
         <MapScale />
         {position && <MapCamera latitude={position.latitude} longitude={position.longitude} />}

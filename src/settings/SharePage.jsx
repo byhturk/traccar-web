@@ -27,7 +27,7 @@ const SharePage = () => {
 
   const device = useSelector((state) => state.devices.items[id]);
 
-  const [expiration, setExpiration] = useState(dayjs().add(1, 'week').locale('en').format('YYYY-MM-DD'));
+  const [expiration, setExpiration] = useState(dayjs().add(2, 'hour').locale('en').format('YYYY-MM-DDTHH:mm'));
   const [link, setLink] = useState();
 
   const handleShare = useCatchCallback(async () => {
@@ -61,7 +61,7 @@ const SharePage = () => {
             />
             <TextField
               label={t('userExpirationTime')}
-              type="date"
+              type="datetime-local"
               value={expiration}
               onChange={(e) => setExpiration(e.target.value)}
             />
@@ -89,7 +89,7 @@ const SharePage = () => {
             variant="outlined"
             onClick={() => navigate(-1)}
           >
-            {t('sharedCancel')}
+            {t('sharedHide')}
           </Button>
           <Button
             type="button"

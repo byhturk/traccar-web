@@ -43,7 +43,7 @@ const MapPositions = ({ positions, onClick, showStatus, selectedPosition, titleF
       id: position.id,
       deviceId: position.deviceId,
       name: device.name,
-      fixTime: formatTime(position.fixTime, 'seconds'),
+      fixTime: formatTime(position.deviceTime, 'seconds'),
       category: mapIconKey(category),
       color: showStatus ? position.attributes.color || position.attributes.blocked ? 'error' : getStatusColor(device.status) : 'neutral' ,
       rotation: position.course,
