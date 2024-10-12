@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
 
@@ -39,6 +39,20 @@ const NotificationPage = () => {
 
   const features = useFeatures(); /* tanımlama yaptık */
 
+  const [notificationTypes, setNotificationTypes] = useState([]);
+  const allowedTypes = ['alarm', 'geofenceEnter', 'geofenceExit', 'ignitionOn', 'ignitionOff', 'deviceOnline', 'deviceOffline','deviceUnknown', 'deviceMoving', 'deviceStopped', 'deviceOverspeed', 'maintenance'];
+
+  useEffect(() => {
+    const fetchNotificationTypes = async () => {
+      const response = await fetch('/api/notifications/types');
+      const types = await response.json();
+
+      // Admin'e göre filtreleme
+      const filteredTypes = admin ? types : types.filter(type => allowedTypes.includes(type.type));
+      setNotificationTypes(filteredTypes);
+    };
+    fetchNotificationTypes();
+  }, [admin]);
 
   const testNotificators = useCatch(async () => {
     await Promise.all(item.notificators.split(/[, ]+/).map(async (notificator) => {
@@ -81,7 +95,7 @@ const NotificationPage = () => {
               <SelectField
                 value={item.type}
                 onChange={(e) => setItem({ ...item, type: e.target.value })}
-                endpoint="/api/notifications/types"
+                data={notificationTypes} // Filtrelenmiş türler burada
                 keyGetter={(it) => it.type}
                 titleGetter={(it) => t(prefixString('event', it.type))}
                 label={t('sharedType')}

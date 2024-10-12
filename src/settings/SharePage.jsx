@@ -50,7 +50,7 @@ const SharePage = () => {
         <Accordion defaultExpanded>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Typography variant="subtitle1">
-              {t('sharedRequired')}
+              {t('deviceShare')}
             </Typography>
           </AccordionSummary>
           <AccordionDetails className={classes.details}>
