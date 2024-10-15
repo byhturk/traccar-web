@@ -63,10 +63,13 @@
   transition: width 0.25s, min-width 0.25s;
 }
 /* Güvenli Bölge Butonlar takipon */
-.mapboxgl-ctrl-group button{
-  min-height: 60px;
-  min-width: 60px;
+
+.maplibregl-ctrl-group button{
+  width: 35px;
+  height: 35px;
 }
+
+
 /* Suggestions */
 .maplibregl-ctrl-geocoder .suggestions {
   background-color: #fff;

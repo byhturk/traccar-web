@@ -22,7 +22,7 @@ const draw = new MapboxDraw({
   displayControlsDefault: false,
   controls: {
     polygon: true,
-    line_string: true,
+    line_string: false,
     trash: true,
   },
   userProperties: true,
@@ -32,7 +32,7 @@ const draw = new MapboxDraw({
     filter: ['all'],
     layout: {
       'text-field': '{user_name}',
-      'text-size': 12,
+      'text-size': 14,
     },
     paint: {
       'text-halo-color': 'white',

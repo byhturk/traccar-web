@@ -2,7 +2,7 @@ import React, {
   useState, useEffect, useRef, useCallback,
 } from 'react';
 import {
-  IconButton, Paper, Slider, Toolbar, Typography,
+  IconButton, Paper, Slider, Toolbar, Typography,Tooltip
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -211,6 +211,8 @@ const ReplayPage = () => {
                 </IconButton>
                 {formatTime(positions[index].fixTime, 'seconds')}
               </div>
+              <Tooltip title="Renkler Mevcut Aralıktaki En Yüksek Hızdan(Kırmızı), En Düşük Hıza doğru (Yeşil) Renklendirilmektedir. Yeşil Renk Duraklama veya Yavaşlama Noktalarını Temsil Eder." open ></Tooltip>
+
             </>
           ) : (
             <ReportFilter handleSubmit={handleSubmit} fullScreen showOnly />

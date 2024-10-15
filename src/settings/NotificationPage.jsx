@@ -71,7 +71,6 @@ const NotificationPage = () => {
   const [attributes] = useState(user.attributes);
   const smsLimit = attributes.smsLimit;
 
-
   const validate = () => item && item.type && item.notificators && (!item.notificators?.includes('command') || item.commandId);
 
   return (
@@ -112,8 +111,22 @@ const NotificationPage = () => {
               )}
               <SelectField
                 multiple
-                value={item.notificators ? (features.disableSms ? item.notificators.split(/[, ]+/).filter((value) => value !== 'sms') : item.notificators.split(/[, ]+/)) : []}
-                onChange={(e) => setItem({ ...item, notificators: features.disableSms ? e.target.value.filter((value) => value !== 'sms').join() : e.target.value.join() })}
+                value={
+                  item.notificators
+                    ? smsLimit > 0
+                      ? item.notificators.split(/[, ]+/) //tüm notificator'ları göster
+                      : item.notificators.split(/[, ]+/).filter((value) => value !== 'sms') //'sms' hariç diğerlerini göster
+                    : []
+                }
+                onChange={(e) =>
+                  setItem({
+                    ...item,
+                    notificators: smsLimit > 0
+                      ? e.target.value.join() // doğrudan seçilen değerleri kaydet
+                      : e.target.value.filter((value) => value !== 'sms').join(), // 'sms' değerini filtrele
+                  })
+                }
+                
                 endpoint="/api/notifications/notificators"
                 keyGetter={(it) => it.type}
                 titleGetter={(it) => t(prefixString('notificator', it.type))}
@@ -128,12 +141,12 @@ const NotificationPage = () => {
                   label={t('sharedSavedCommand')}
                 />
               )}
-              {features.disableSms && (
-                <Typography variant="body2" color="secondary" >
-                  SMS paketiniz Mevcut değil.
+              {(smsLimit == null || smsLimit <= 0) && (
+                <Typography variant="body2" color="secondary">
+                  SMS paketiniz Aktif değil.
                 </Typography>
               )}
-              {smsLimit >= 0 && !features.disableSms && (
+              {smsLimit >= 0 && (
                 <Typography className={classes.smsLimit} variant="body2"  color="primary" style={{ fontStyle: 'italic' }}>
                   {t('notificatorSms')} {t('userUserLimit')} :{smsLimit ? smsLimit : 0 }
                 </Typography>
@@ -166,11 +179,13 @@ const NotificationPage = () => {
               </Typography>
             </AccordionSummary>
             <AccordionDetails className={classes.details}>
-              <TextField
-                value={item.description || ''}
-                onChange={(e) => setItem({ ...item, description: e.target.value })}
-                label={t('sharedDescription')}
-              />
+              {admin && 
+                <TextField
+                  value={item.description || ''}
+                  onChange={(e) => setItem({ ...item, description: e.target.value })}
+                  label={t('sharedDescription')}
+                />
+              }
               <SelectField
                 value={item.calendarId}
                 onChange={(e) => setItem({ ...item, calendarId: Number(e.target.value) })}
