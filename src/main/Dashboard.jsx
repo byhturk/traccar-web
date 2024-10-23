@@ -110,55 +110,61 @@ const Dashboard = () => {
           const onlineDevices = data.filter(device => device.status === 'online');
           const offlineAndUnknownDevices = data.filter(device => device.status !== 'online');
           const motionDevicesTrue = data.filter(device => device.status === 'online' && device.motionState === true);
-          const motionDevicesFalse = data.filter(device => device.motionState !== true || device.status !== 'online' );
+          const motionDevicesFalse = data.filter(device => device.motionState !== true || device.status !== 'online');
           setOnlineCount(onlineDevices.length);
           setOfflineAndUnknownCount(offlineAndUnknownDevices.length);
           setMotionCountTrue(motionDevicesTrue.length);
           setMotionCountFalse(motionDevicesFalse.length);
-          
+  
           // Device IDs'leri de state'e set et
           const deviceIds = data.map(device => device.id);
           setDeviceIds(deviceIds);
           setDeviceDetails(data);
-
-          
+  
           // Event data fetch
           const currentTime = new Date();
           const fourHoursAgo = new Date(currentTime - 24 * 60 * 60 * 1000);
           const fromTime = fourHoursAgo.toISOString();
           const toTime = currentTime.toISOString();
-
-          const promises = deviceIds.map(deviceId => {
-            const types = ['alarm', 'deviceInactive', 'deviceMoving', 'deviceStopped', 'deviceOverspeed', 'deviceFuelDrop', 'geofenceEnter', 'geofenceExit', 'ignitionOn', 'ignitionOff', 'maintenance', 'driverChanged'];
-
-            const queryParams = new URLSearchParams({
-              deviceId: deviceId,
-              from: fromTime,
-              to: toTime,
-            });
-
-            types.forEach(type => {
-              queryParams.append('type', type);
-            });
-
-            return fetch(`/api/reports/events?${queryParams.toString()}`, {
-              headers: { Accept: 'application/json' },
-            });
+  
+          const queryParams = new URLSearchParams({
+            from: fromTime,
+            to: toTime,
           });
-          const responses = await Promise.all(promises);
-          const eventData = await Promise.all(responses.map(response => response.json()));
-
-          const mergedEventData = eventData.flat();
-          mergedEventData.sort((a, b) => new Date(b.eventTime) - new Date(a.eventTime));
-          const lastTenEvents = mergedEventData.slice(0, 10);
-          setEvents(lastTenEvents);
-
-          const eventsSpeed = mergedEventData.filter(event => event.type === 'deviceOverspeed');
-          setEventsSpeed(eventsSpeed);
-
-          const eventsGeofenceExit = mergedEventData.filter(event => event.type === 'geofenceExit');
-          setEventsGeofenceExit(eventsGeofenceExit);
-
+  
+          deviceIds.forEach(deviceId => {
+            queryParams.append('deviceId', deviceId);
+          });
+  
+          const types = [
+            'alarm', 'deviceInactive', 'deviceMoving', 'deviceStopped',
+            'deviceOverspeed', 'deviceFuelDrop', 'geofenceEnter', 'geofenceExit',
+            'ignitionOn', 'ignitionOff', 'maintenance', 'driverChanged'
+          ];
+  
+          types.forEach(type => {
+            queryParams.append('type', type);
+          });
+  
+          const eventResponse = await fetch(`/api/reports/events?${queryParams.toString()}`, {
+            headers: { Accept: 'application/json' },
+          });
+  
+          if (eventResponse.ok) {
+            const mergedEventData = await eventResponse.json();
+            mergedEventData.sort((a, b) => new Date(b.eventTime) - new Date(a.eventTime));
+            const lastTenEvents = mergedEventData.slice(0, 10);
+            setEvents(lastTenEvents);
+  
+            const eventsSpeed = mergedEventData.filter(event => event.type === 'deviceOverspeed');
+            setEventsSpeed(eventsSpeed);
+  
+            const eventsGeofenceExit = mergedEventData.filter(event => event.type === 'geofenceExit');
+            setEventsGeofenceExit(eventsGeofenceExit);
+          } else {
+            throw Error(await eventResponse.text());
+          }
+  
         } else {
           throw Error(await response.text());
         }
@@ -166,13 +172,14 @@ const Dashboard = () => {
         console.error('Error fetching data:', error);
       }
     };
-    
+  
     fetchData();
-
-    const interval = setInterval(fetchData, 10000);
+  
+    const interval = setInterval(fetchData, 15000);
   
     return () => clearInterval(interval);
   }, []);
+  
 
    // [] içindeki değişkenler değiştiğinde useEffect çalışır, bu durumda sadece ilk render'da çalışması için boş dizi veriyoruz
 
